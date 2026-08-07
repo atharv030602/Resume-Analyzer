@@ -6,7 +6,10 @@ import requests
 import streamlit as st
 
 load_dotenv()
-API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000/api")
+try:
+    API_BASE_URL = st.secrets.get("API_BASE_URL", os.environ.get("API_BASE_URL", "http://localhost:8000/api"))
+except Exception:
+    API_BASE_URL = os.environ.get("API_BASE_URL", "http://localhost:8000/api")
 
 INK = "#12181b"
 PANEL = "#1a2226"
