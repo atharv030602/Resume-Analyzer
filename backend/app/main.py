@@ -14,7 +14,10 @@ app = FastAPI(title="ResumeFit AI", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten this to your frontend origin before deploying
+    allow_origins=[
+        "https://resume-analyzer-nk4wmappwmh2hdz3prkoh4d.streamlit.app",
+        "http://localhost:8501",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
