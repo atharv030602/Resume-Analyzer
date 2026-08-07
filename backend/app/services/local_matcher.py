@@ -49,6 +49,11 @@ def _extract_fallback_terms(job_description: str) -> dict[str, str]:
         low = stripped.lower()
         if len(low) < 3 or low in GENERIC_STOPWORDS or low in JD_BOILERPLATE or low in _KNOWN_LOWER:
             continue
+        # Skip compound tokens like "Agile/Scrum" or "MySQL/PostgreSQL" where every
+        # slash-separated part is already a known skill — redundant with dict hits.
+        slash_parts = [p for p in low.split("/") if p]
+        if len(slash_parts) > 1 and all(p in _KNOWN_LOWER for p in slash_parts):
+            continue
         looks_significant = (
             any(c.isupper() for c in tok[1:])  # e.g. GitHub, PostgreSQL
             or (tok.isupper() and len(tok) <= 6)  # e.g. SEO, ERP
