@@ -16,7 +16,8 @@
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements.txt                        # core only — tests + deterministic mode
+pip install -r requirements.txt                        # core — deterministic mode
+pip install -r requirements-dev.txt                    # tests + lint (pytest, ruff)
 pip install -r requirements-ai.txt                     # optional — LangChain 1.x + providers (pure Python)
 pip install -r requirements-chroma.txt                 # optional — persistent ChromaDB vectors (native wheels)
 cp .env.example .env                                   # set LLM_PROVIDER + GOOGLE_API_KEY / OPENAI_API_KEY

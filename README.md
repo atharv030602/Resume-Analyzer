@@ -53,7 +53,8 @@ Full reference + curl examples: **[docs/API.md](docs/API.md)**.
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install -r requirements.txt                        # core: tests + deterministic mode
+pip install -r requirements.txt                        # core: deterministic mode
+pip install -r requirements-dev.txt                    # tests + lint (pytest, ruff)
 pip install -r requirements-ai.txt                     # optional: LangChain 1.x + providers (pure Python, 3.11-3.14)
 pip install -r requirements-chroma.txt                 # optional: ChromaDB persistence (needs wheels / Python <=3.13)
 cp .env.example .env                                   # optional: set LLM_PROVIDER + a key
@@ -86,7 +87,7 @@ Put `LLM_PROVIDER` / `GOOGLE_API_KEY` / `OPENAI_API_KEY` in a root `.env` to ena
 ## Tests & CI
 
 ```bash
-cd backend && pytest -q          # 22 tests, no network, no API keys
+cd backend && pip install -r requirements-dev.txt && pytest -q   # 22 tests, no network, no API keys
 ruff check app tests && ruff format --check app tests
 ```
 GitHub Actions (`.github/workflows/ci.yml`) runs lint + format + tests + Docker
