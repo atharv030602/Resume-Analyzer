@@ -1,0 +1,62 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+#
+# Deploy:
+#   1. Push this repo to GitHub (already: github.com/atharv030602/Resume-Analyzer).
+#   2. Render dashboard → New → Blueprint → pick this repo → Apply.
+#   3. On the "resumefit-backend" service → Environment, paste your key:
+#        LLM_PROVIDER = gemini        (or openai)
+#        GOOGLE_API_KEY = <your key>  (or OPENAI_API_KEY)
+#   4. Copy the backend URL, set it on the frontend service as
+#        API_BASE_URL = https://<backend>.onrender.com/api
+#      and add that same origin to the backend's CORS_ORIGINS.
+#
+# Free tier note: the backend runs the pure-Python LangChain stack
+# (INSTALL_AI=true) with the in-memory vector store. If the 512 MB free
+# instance OOMs, either upgrade the plan to "starter" or set INSTALL_AI=false
+# for deterministic-only mode.
+
+services:
+  - type: web
+    name: resumefit-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/health
+    dockerfileArgs:
+      INSTALL_AI: "true"
+      INSTALL_CHROMA: "false"
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_JSON
+        value: "true"
+      - key: DB_ENABLED
+        value: "false"
+      - key: VECTOR_BACKEND
+        value: memory
+      - key: CORS_ORIGINS
+        value: https://resume-analyzer-nk4wmappwmh2hdz3prkoh4d.streamlit.app
+      - key: LLM_PROVIDER
+        value: gemini
+      - key: GOOGLE_API_KEY
+        sync: false          # set in the dashboard
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LANGSMITH_TRACING
+        value: "false"
+      - key: LANGSMITH_API_KEY
+        sync: false
+
+  # Optional: host the Streamlit frontend on Render too (skip if using
+  # Streamlit Community Cloud).
+  - type: web
+    name: resumefit-frontend
+    runtime: python
+    rootDir: frontend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    envVars:
+      - key: API_BASE_URL
+        sync: false          # set to https://<backend>.onrender.com/api

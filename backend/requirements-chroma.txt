@@ -1,0 +1,5 @@
+# Optional: persistent ChromaDB vector store (VECTOR_BACKEND=chroma).
+# Needs prebuilt wheels for your Python (3.11/3.12/3.13) or a C toolchain.
+# The Docker image installs this; local dev can skip it and use
+# VECTOR_BACKEND=memory.
+chromadb>=0.5,<2

@@ -1,0 +1,21 @@
+# Optional AI stack — install to enable LLM suggestions, the tool-calling
+# agent (LangChain 1.x `create_agent`), provider embeddings, and grounded
+# RAG chat answers.
+#
+#   pip install -r requirements.txt -r requirements-ai.txt
+#
+# Pure-Python — installs on Python 3.11–3.14 with no build toolchain.
+# Without these the service still runs: every AI path falls back to the
+# deterministic local engine and the offline hashing embedder.
+
+langchain>=1.3,<2
+langchain-core>=1.6,<2
+langgraph>=1.2,<2
+langchain-google-genai>=4.3,<5
+langchain-openai>=1.6,<2
+langsmith>=0.11,<1
+
+# ChromaDB is a separate install (needs a C toolchain / prebuilt wheels;
+# Python 3.13 or the Docker image). Local dev without it uses
+# VECTOR_BACKEND=memory automatically.
+#   pip install -r requirements-chroma.txt

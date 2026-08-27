@@ -1,0 +1,61 @@
+name: resumefit-ai
+
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        INSTALL_AI: "true"
+    ports:
+      - "8000:8000"
+    environment:
+      ENVIRONMENT: docker
+      LOG_JSON: "true"
+      DB_ENABLED: "true"
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: resumefit
+      DB_NAME: resumefit
+      CORS_ORIGINS: http://localhost:8501
+      LLM_PROVIDER: ${LLM_PROVIDER:-gemini}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      VECTOR_BACKEND: chroma
+      CHROMA_DIR: /data/chroma
+      LANGSMITH_TRACING: ${LANGSMITH_TRACING:-false}
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY:-}
+    volumes:
+      - chroma_data:/data/chroma
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "8501:8501"
+    environment:
+      API_BASE_URL: http://backend:8000/api
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: resumefit
+      MYSQL_DATABASE: resumefit
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-presumefit"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  chroma_data:
+  mysql_data:

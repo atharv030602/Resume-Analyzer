@@ -1,0 +1,17 @@
+line-length = 100
+target-version = "py311"
+extend-exclude = [".venv", ".chroma"]
+
+[lint]
+select = ["E", "F", "I", "UP", "B", "W"]
+ignore = [
+    "E501",   # line length handled by the formatter
+    "B008",   # FastAPI Depends() in defaults is idiomatic
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["B011"]
+
+[format]
+# The v1 keyword engine keeps its hand-curated blank-line grouping; lint still applies.
+exclude = ["app/services/skills_data.py", "app/services/local_matcher.py"]

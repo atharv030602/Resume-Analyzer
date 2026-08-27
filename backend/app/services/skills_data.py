@@ -191,8 +191,8 @@ JD_BOILERPLATE: set[str] = {
     "looking", "excellent", "preferred", "plus", "including", "using",
     "help", "build", "building", "develop", "developing", "development",
     "new", "opportunity", "position", "job", "description", "apply",
-    "responsible", "including", "across", "within", "well", "good",
-    "level", "high", "related", "including", "environment", "based",
+    "responsible", "across", "within", "well", "good",
+    "level", "high", "related", "environment", "based",
     "us", "we", "our", "you", "an", "a", "to", "of", "in", "on", "or",
     "is", "be", "as", "at", "by", "it", "if",
 }

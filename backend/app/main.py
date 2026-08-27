@@ -1,25 +1,72 @@
-from fastapi import FastAPI
+"""ResumeFit AI 2.0 — FastAPI application entrypoint."""
+
+from __future__ import annotations
+
+import time
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.database import Base, engine
-from app.routers import analysis
+from app.config import settings
+from app.core.errors import register_exception_handlers
+from app.core.llm import configure_langsmith
+from app.database import init_db
+from app.logging_config import configure_logging, get_logger, new_request_id, set_request_id
+from app.routers import analysis, chat, health
 
-# Auto-create tables on startup (mirrors spring.jpa.hibernate.ddl-auto=update)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"WARNING: could not create DB tables, DB features disabled: {e}")
+configure_logging()
+log = get_logger("app")
 
-app = FastAPI(title="ResumeFit AI", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    log.info(
+        "Starting %s v%s (env=%s)", settings.app_name, settings.app_version, settings.environment
+    )
+    configure_langsmith()
+    init_db()
+    log.info(
+        "AI enabled=%s provider=%s | vector_backend=%s",
+        settings.ai_enabled,
+        settings.llm_provider,
+        settings.vector_backend,
+    )
+    yield
+    log.info("Shutting down.")
+
+
+app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://resume-analyzer-nk4wmappwmh2hdz3prkoh4d.streamlit.app",
-        "http://localhost:8501",
-    ],
+    allow_origins=settings.cors_origin_list,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def request_context(request: Request, call_next):
+    rid = request.headers.get("x-request-id") or new_request_id()
+    set_request_id(rid)
+    started = time.perf_counter()
+    response = await call_next(request)
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    response.headers["x-request-id"] = rid
+    log.info(
+        "%s %s -> %s (%.0f ms)", request.method, request.url.path, response.status_code, elapsed_ms
+    )
+    return response
+
+
+register_exception_handlers(app)
+
+app.include_router(health.router)
 app.include_router(analysis.router)
+app.include_router(chat.router)
+
+
+@app.get("/", tags=["health"])
+def root():
+    return {"service": settings.app_name, "version": settings.app_version, "docs": "/docs"}

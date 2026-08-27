@@ -9,6 +9,14 @@ __pycache__/
 # Streamlit
 .streamlit/
 
+# Vector store / local data
+.chroma/
+*.sqlite3
+
+# Test / tooling caches
+.pytest_cache/
+.ruff_cache/
+
 # Editor/OS
 .vscode/
 .idea/
