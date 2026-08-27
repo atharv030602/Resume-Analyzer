@@ -16,7 +16,7 @@ COPY requirements.txt requirements-ai.txt requirements-chroma.txt ./
 # INSTALL_CHROMA: persistent ChromaDB vectors (native deps, ~300 MB — skip on
 #                 512 MB free tiers and use VECTOR_BACKEND=memory).
 ARG INSTALL_AI=true
-ARG INSTALL_CHROMA=true
+ARG INSTALL_CHROMA=false
 RUN pip install --upgrade pip \
     && pip install -r requirements.txt \
     && if [ "$INSTALL_AI" = "true" ]; then pip install -r requirements-ai.txt; fi \
