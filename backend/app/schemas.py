@@ -10,6 +10,9 @@ from pydantic import BaseModel, Field
 class AnalyzeRequest(BaseModel):
     resume_text: str = Field(..., min_length=1)
     job_description: str = Field(..., min_length=1)
+    # v2 only: when set, the resume + JD are also indexed into this chat
+    # session so the Resume Chat assistant can answer about them immediately.
+    session_id: str | None = Field(default=None, min_length=6, max_length=64)
 
 
 class AnalyzeResponse(BaseModel):

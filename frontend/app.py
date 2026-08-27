@@ -102,23 +102,29 @@ with tab_fit:
     if st.button("Run analysis", type="primary", use_container_width=True, disabled=not can_submit):
         with st.spinner("Running agent → ATS → suggestions…"):
             try:
+                sid = st.session_state.session_id
                 if mode == "Paste resume text":
                     resp = requests.post(
                         f"{API_BASE_URL}/v2/analyze",
-                        json={"resume_text": resume_text, "job_description": job_description},
+                        json={
+                            "resume_text": resume_text,
+                            "job_description": job_description,
+                            "session_id": sid,
+                        },
                         timeout=180,
                     )
                 else:
                     resp = requests.post(
                         f"{API_BASE_URL}/v2/analyze/upload",
                         files={"resume_file": (resume_file.name, resume_file.getvalue())},
-                        data={"job_description": job_description},
+                        data={"job_description": job_description, "session_id": sid},
                         timeout=180,
                     )
                 resp.raise_for_status()
                 st.session_state["result"] = resp.json()
-                st.session_state["last_resume_text"] = resume_text
                 st.session_state["last_jd"] = job_description
+                # Backend has now indexed this resume + JD into the chat session.
+                st.session_state["chat_ready"] = True
             except requests.exceptions.RequestException as e:
                 st.session_state["result"] = None
                 detail = ""
@@ -223,22 +229,7 @@ with tab_fit:
                 mime="text/plain",
                 use_container_width=True,
             )
-        if st.button("Send this resume + JD to the chat assistant", use_container_width=True):
-            try:
-                requests.post(
-                    f"{API_BASE_URL}/v2/chat/ingest",
-                    json={
-                        "session_id": st.session_state.session_id,
-                        "resume_text": st.session_state.get("last_resume_text", "")
-                        or "(uploaded file)",
-                        "job_description": st.session_state.get("last_jd", ""),
-                    },
-                    timeout=60,
-                )
-                st.session_state["chat_ready"] = True
-                st.success("Indexed. Open the Resume Chat tab.")
-            except requests.exceptions.RequestException as e:
-                st.error(f"Ingest failed: {e}")
+        st.success("This resume + JD are now loaded into the Resume Chat tab →")
 
 
 # ─────────────────────────────────────────────────────────────────────────

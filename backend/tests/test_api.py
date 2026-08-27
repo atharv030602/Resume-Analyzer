@@ -25,6 +25,21 @@ def test_v2_analyze(client, resume, jd):
     assert any("skill_gap_tool" in step for step in body["agent_trace"])
 
 
+def test_v2_analyze_seeds_chat_session(client, resume, jd):
+    sid = "analyze-seeds-chat-01"
+    r = client.post(
+        "/api/v2/analyze",
+        json={"resume_text": resume, "job_description": jd, "session_id": sid},
+    )
+    assert r.status_code == 200
+    # /v2/analyze should have indexed resume + JD into the chat session.
+    chat = client.post(
+        "/api/v2/chat", json={"session_id": sid, "message": "summarize my background"}
+    )
+    assert chat.status_code == 200
+    assert len(chat.json()["citations"]) >= 1
+
+
 def test_v2_analyze_validation_error(client):
     r = client.post("/api/v2/analyze", json={"resume_text": "", "job_description": "x"})
     assert r.status_code == 422
