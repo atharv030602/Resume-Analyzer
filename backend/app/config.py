@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     cors_origins: str = (
         "http://localhost:8501,https://resume-analyzer-nk4wmappwmh2hdz3prkoh4d.streamlit.app"
     )
+    # Any *.streamlit.app frontend is allowed by default, so a redeployed
+    # Streamlit app with a new subdomain works without touching the backend.
+    cors_origin_regex: str = r"https://.*\.streamlit\.app"
 
     # --- Database (optional persistence) -------------------------------
     db_user: str = "root"
