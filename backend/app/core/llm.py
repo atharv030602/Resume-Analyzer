@@ -67,6 +67,7 @@ def get_chat_model(temperature: float | None = None) -> Any:
         return ChatOpenAI(
             model=settings.openai_chat_model,
             api_key=settings.openai_api_key,
+            base_url=settings.openai_base_url or None,
             temperature=temp,
             timeout=settings.llm_timeout_seconds,
         )
@@ -78,7 +79,10 @@ def get_embeddings() -> Any:
     """Provider embeddings when a key is set, else the offline fallback."""
     provider = settings.llm_provider.lower()
 
-    if settings.active_api_key:
+    # OpenAI-compatible gateways (OpenRouter, etc.) don't serve embeddings.
+    gateway = provider == "openai" and bool(settings.openai_base_url)
+
+    if settings.active_api_key and not gateway:
         try:
             if provider == "gemini":
                 from langchain_google_genai import GoogleGenerativeAIEmbeddings
@@ -96,6 +100,8 @@ def get_embeddings() -> Any:
                 )
         except Exception as exc:  # pragma: no cover - dependency/network issue
             log.warning("Provider embeddings unavailable (%s); using offline fallback.", exc)
+    elif gateway:
+        log.info("OpenAI-compatible gateway in use; embeddings use the offline hasher.")
 
     from app.services.embeddings_service import HashingEmbeddings
 

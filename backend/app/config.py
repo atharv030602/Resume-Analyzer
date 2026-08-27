@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     llm_provider: str = "gemini"  # gemini | openai
     google_api_key: str = ""
     openai_api_key: str = ""
+    # Point at an OpenAI-compatible gateway (e.g. OpenRouter:
+    # https://openrouter.ai/api/v1). When set, that endpoint has no
+    # /embeddings route, so embeddings fall back to the offline hasher.
+    openai_base_url: str = ""
     gemini_chat_model: str = "gemini-1.5-flash"
     gemini_embed_model: str = "models/text-embedding-004"
     openai_chat_model: str = "gpt-4o-mini"
