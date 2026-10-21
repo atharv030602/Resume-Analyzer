@@ -23,9 +23,7 @@ services:
     dockerContext: ./backend
     plan: free
     healthCheckPath: /api/health
-    dockerfileArgs:
-      INSTALL_AI: "true"
-      INSTALL_CHROMA: "false"
+    # Dockerfile defaults: INSTALL_AI=true, INSTALL_CHROMA=false (fits 512 MB).
     envVars:
       - key: ENVIRONMENT
         value: production
