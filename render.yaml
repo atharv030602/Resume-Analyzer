@@ -41,11 +41,11 @@ services:
       - key: LLM_PROVIDER
         value: openai
       - key: OPENAI_API_KEY
-        sync: false          # set in the dashboard (your OpenRouter sk-or-v1-... key)
+        sync: false          # set in the dashboard: free OpenRouter key (sk-or-v1-...)
       - key: OPENAI_BASE_URL
         value: https://openrouter.ai/api/v1
       - key: OPENAI_CHAT_MODEL
-        value: openai/gpt-4o-mini
+        value: google/gemma-4-31b-it:free   # free tier; alt: openrouter/free
       - key: GOOGLE_API_KEY
         sync: false
       - key: LANGSMITH_TRACING
